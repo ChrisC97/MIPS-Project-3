@@ -6,6 +6,8 @@
 	newLine: .asciiz "\n"
 	userString: .space 1001 #1000 characters
 	charCount: .word 0
+	# CalculateValues #
+	cvMessage: .space 1001 #1000 characters.
 	
 .text # Instructions section, goes in text segment.
 
@@ -46,4 +48,6 @@ endProgram:
 	
 # CALCULATE VALUES #
 CalculateValues:
+	la $t0, cvMessage # cvMessage address.
+	addi $t1, $t1, 0 # i.
 	jr $ra # return to main.
