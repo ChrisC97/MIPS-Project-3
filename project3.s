@@ -63,7 +63,12 @@ cvStringCpyEnd:
 	la $t0, cvMessage # cvMessage address.
 	add $t1, $zero, $zero # i = 0.
 cvProcesSubLoop:
-	
+	add $t2, $t0, $t1 # cvMessage[i] address.
+	lb $t3, 0($t2) # cvMessage[i].
+	addiu $sp, $sp, -4 # stackPointer -= 1.
+	sb $t3, 0($sp) # stack[stackPointer] = cvMessage[i].
+cvProcessAndLoop:
+cvProcessAndEnd:
 	jr $ra # return to main.
 	
 # PROCESS SUBSTRING #
