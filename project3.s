@@ -77,11 +77,11 @@ cvProcessSubLoop:
 	j cvProcessSubLoop
 cvProcessAndLoop:
 	addiu $sp, $sp, 4 # stackPointer += 1. Ignore the ',' character.
-	
+	jal ProcessSubstring
 	j cvProcessSubLoop
 cvProcessAndEnd:
 	addiu $sp, $sp, 4 # stackPointer += 1. Ignore the null character.
-	
+	jal ProcessSubstring
 	jr $ra # return to main.
 	
 # PROCESS SUBSTRING #
