@@ -62,12 +62,16 @@ cvStringCpyLoop:
 cvStringCpyEnd:
 	la $t0, cvMessage # cvMessage address.
 	add $t1, $zero, $zero # i = 0.
-cvProcesSubLoop:
+cvProcessSubLoop:
 	add $t2, $t0, $t1 # cvMessage[i] address.
 	lb $t3, 0($t2) # cvMessage[i].
 	addiu $sp, $sp, -4 # stackPointer -= 1.
 	sb $t3, 0($sp) # stack[stackPointer] = cvMessage[i].
+	beq $t3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
+	beq $t3, 44, cvProcessAndLoop # cvMessage[i] == ','. Process what's on the stack and loop.
+	j cvProcessSubLoop
 cvProcessAndLoop:
+	j cvProcessSubLoop
 cvProcessAndEnd:
 	jr $ra # return to main.
 	
