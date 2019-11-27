@@ -60,7 +60,4 @@ cvStringCpyLoop:
 	bgt $t1, 1000, cvStringCpyEnd # i > 1000, exit out.
 	j cvStringCpyLoop # Loop back.
 cvStringCpyEnd:
-	li $v0, 4 # System call to print a string.
-	la $a0, cvMessage # Load string to be printed.
-	syscall # Print string.
 	jr $ra # return to main.
