@@ -21,6 +21,12 @@ main:
 	li $a1, 1001 # Max number of characters to read.
 	syscall
 	
+	# PASS STRING THROUGH STACK #
+	addiu $sp, $sp, -4 # expand stack.
+	sb 0, ($sp) # Save "null" to the stack. That signifies the end of the string.
+mStringSaveStart:
+
+	
 	jal CalculateValues
 	
 	# END OF PROGRAM #
