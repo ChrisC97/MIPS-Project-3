@@ -8,6 +8,7 @@
 	charCount: .word 0
 	# CalculateValues #
 	cvMessage: .space 1001 #1000 characters.
+	cvResult: .space 1001 # 1000 characters.
 	
 .text # Instructions section, goes in text segment.
 
@@ -76,12 +77,15 @@ cvProcessSubLoop:
 	beq $t3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
 	j cvProcessSubLoop
 cvProcessAndLoop:
-	addiu $sp, $sp, 4 # stackPointer += 1. Ignore the ',' character.
-	jal ProcessSubstring
+	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
+	jal ProcessSubstring # Process substring.
+	lw $ra, 0($sp) # $ra = stack[stackPointer].
 	j cvProcessSubLoop
 cvProcessAndEnd:
-	addiu $sp, $sp, 4 # stackPointer += 1. Ignore the null character.
-	jal ProcessSubstring
+	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the null character.
+	jal ProcessSubstring # Process substring.
+	lw $ra, 0($sp) # $ra = stack[stackPointer].
+cvEnd:
 	jr $ra # return to main.
 	
 # PROCESS SUBSTRING #
