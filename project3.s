@@ -20,3 +20,8 @@ main:
 	la $a0, userString # Where the string is saved.
 	li $a1, 1001 # Max number of characters to read.
 	syscall
+	
+	# END OF PROGRAM #
+endProgram:
+	li $v0, 10 # Exit program system call.
+	syscall
