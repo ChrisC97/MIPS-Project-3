@@ -21,7 +21,14 @@ main:
 	li $a1, 1001 # Max number of characters to read.
 	syscall
 	
+	jal CalculateValues
+	
 	# END OF PROGRAM #
 endProgram:
 	li $v0, 10 # Exit program system call.
 	syscall
+	
+	
+# CALCULATE VALUES #
+CalculateValues:
+	jr $ra # return to main.
