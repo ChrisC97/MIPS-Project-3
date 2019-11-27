@@ -22,10 +22,13 @@ main:
 	syscall
 	
 	# PASS STRING THROUGH STACK #
-	addiu $sp, $sp, -4 # expand stack.
+	la $t0, userString # message address.
+	addi $t1, $t1, 1001 # i.
+	addiu $sp, $sp, -1 # expand stack by one byte.
 	sb 0, ($sp) # Save "null" to the stack. That signifies the end of the string.
-mStringSaveStart:
-
+mStringSaveLoop:
+	add $t2, $t0, $t1 # message[i] address.
+	lb $t3, 0($t2) # Character at message[i].
 	
 	jal CalculateValues
 	
