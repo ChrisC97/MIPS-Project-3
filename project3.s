@@ -26,12 +26,12 @@ main:
 	# PASS STRING THROUGH STACK #
 	la $t0, userString # message address.
 	addi $t1, $zero, 1000 # i = 1000.
-	addiu $sp, $sp, -1 # stackPointer -= 1 (in bytes).
+	addiu $sp, $sp, -4 # stackPointer -= 1 (in words).
 	sb $zero, 0($sp) # Save "null" to the stack. That signifies the end of the string.
 mStringSaveLoop:
 	add $t2, $t0, $t1 # message[i] address.
 	lb $t3, 0($t2) # Character at message[i].
-	addiu $sp, $sp, -1 # stackPointer -= 1.
+	addiu $sp, $sp, -4 # stackPointer -= 1.
 	sb $t3, 0($sp) # stack[stackPointer] = message[i].
 	addiu $t1, $t1, -1 # i--
 	blt, $t1, $zero, mStringSaveLoopEnd # i < 0, exit out.
@@ -56,8 +56,16 @@ cvStringCpyLoop:
 	beq $t3, 0, cvStringCpyEnd # stackCharacter == null, then exit out. 
 	sb $t3, 0($t2) # cvMessage[i] = stackCharacter.
 	addiu $t1, $t1, 1 # i++
-	addiu $sp, $sp, 1 # stackPointer += 1.
+	addiu $sp, $sp, 4 # stackPointer += 1.
 	bgt $t1, 1000, cvStringCpyEnd # i > 1000, exit out.
 	j cvStringCpyLoop # Loop back.
 cvStringCpyEnd:
+	la $t0, cvMessage # cvMessage address.
+	add $t1, $zero, $zero # i = 0.
+cvProcesSubLoop:
+	
 	jr $ra # return to main.
+	
+# PROCESS SUBSTRING #
+ProcessSubstring:
+	jr $ra # return to CalculateValues.
