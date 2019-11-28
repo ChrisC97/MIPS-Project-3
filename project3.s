@@ -120,6 +120,12 @@ psStringCpyEnd:
 	add $sp, $sp, $t2 # stackPointer + sPos.
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $t8, 0($sp) # Put ra on the stack.
+psMain:
+	jal removeLeading
+	jal replaceString
+	jal findCharCount
+	sw $v0, charCount # set charCount.
+	jal removeTrailing
 	jr $ra # return to CalculateValues.
 	
 	
@@ -133,9 +139,9 @@ removeLeading:
 	add $t3, $zero, $zero # h.
 	add $t4, $zero, $zero # hitCharacter. Defaults to false (0).
 rLLoop:
-	add $t5, $t0, $t2 # message[i].
+	add $t5, $t0, $t2 # message[i] address.
 	add $t6, $t1, $t3 # newMessage[h].
-	lb $t7, 0($t5) # The character at message[i].
+	lb $t7, 0($t5) # message[i].
 	beq $t7, 0, rLLoopEnd # message[i] = null, end of string.
 	beq $t4, 1, rLLoopOther # hitCharacter == true, ignore our space logic.
 	bne $t7, 32, rLLoopOther # message[i] != ' ', ignore our space logic.
@@ -174,7 +180,7 @@ replaceString:
 rSLoop:
 	add $t5, $t0, $t2 # message[i] address.
 	add $t6, $t1, $t2 # tempMessage[i] address.
-	lb $t7, 0($t6) # The character at tempMessage[i].
+	lb $t7, 0($t6) # tempMessage[i].
 	sb $t7, 0($t5) # message[i] = tempMessage[i].
 	sb $zero, 0($t6) # tempMessage[i] = 0
  	addi $t2, $t2, 1 # i++.
@@ -187,18 +193,17 @@ rSLoopEnd:
 findCharCount:
 	la $t0, psSubstring # message address.
 	add $t1, $zero, $zero # i.
-	add $s7, $zero, $zero # charCount = 0.
+	add $v0, $zero, $zero # charCount = 0.
 fCLoop:
-	add $t2, $t0, $t1 # message[i].
-	lb $t3, 0($t2) # The character at message[i].
+	add $t2, $t0, $t1 # message[i] address.
+	lb $t3, 0($t2) # message[i].
 	bgt $t1, 1000, fCEnd # i > 1000, end of string.
 	slt $t4, $t3, 33 # message[i] < '!'?
 	beq $t4, 1, fCLoopEnd # message[i] <= ' ', loop again.
-	add $s7, $zero, $t1 # charCount = i.
+	add $v0, $zero, $t1 # charCount = i.
 fCLoopEnd:
 	addi $t1, $t1, 1 # i++.
 	j fCLoop
 fCEnd:
-	addi $s7, $s7, 1 # the number of characters is i+1.
-	add $v0, $zero, $s7 #sw $s7, charCount # set charCount.
+	addi $v0, $v0, 1 # the number of characters is i+1.
 	jr $ra
