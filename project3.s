@@ -227,5 +227,7 @@ fCLoopEnd:
 	j fCLoop
 fCEndEmpty:
 	addiu $v0, $zero, -1 # Empty, count = -1.
+	jr $ra
 fCEnd:
+	addi $v0, $v0, 1 # the number of characters is i+1.
 	jr $ra
