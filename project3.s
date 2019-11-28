@@ -121,11 +121,26 @@ psStringCpyEnd:
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $t8, 0($sp) # Put ra on the stack.
 psMain:
+	addiu $sp, $sp, -4 # create space in the stack.
+	sw $ra, 0($sp) # Push our ra on the stack.
 	jal removeLeading
 	jal replaceString
 	jal findCharCount
 	sw $v0, charCount # set charCount.
+	lw $t5, charCount # load charCount.
+	
+	li $v0, 1 # Printing result
+	add $a0, $zero, $t5 # Set a0 to the result.
+	syscall 
+	
+	li $v0, 4 # System call to print a string.
+	la $a0, newLine # Load string to be printed.
+	syscall # Print string.
+	
 	jal removeTrailing
+	
+	lw $ra, 0($sp) # Pop ra off the stack.
+	addi $sp, $sp, 4 # Return the stack pointer.
 	jr $ra # return to CalculateValues.
 	
 	
@@ -160,12 +175,12 @@ rLLoopEnd:
 # REMOVE TRAILING SPACES #
 removeTrailing:
 	la $t0, psSubstring # message address.
-	add $t1, $zero, $zero # 0, null/the end of a string.
+	add $t1, $zero, $zero # 0 = null.
 	lw $t7, charCount # lastCharacterIndex.
 	bgt $t7, 1001, rTEnd # lastCharacterIndex > 1001, end of string.
 rTLoop:
-	add $t1, $t0, $t7 # message[lastCharacterIndex] address.
-	sb $t2, 0($t1) # message[lastCharacterIndex] = null.
+	add $t2, $t0, $t7 # message[lastCharacterIndex] address.
+	sb $t1, 0($t2) # message[lastCharacterIndex] = null.
 	addi $t7, $t7, 1 # lastCharacterIndex++.
 	bgt $t7, 1001, rTEnd # lastCharacterIndex > 1001, end of string.
 	j rTLoop
