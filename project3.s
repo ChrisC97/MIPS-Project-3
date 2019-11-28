@@ -99,6 +99,7 @@ ProcessSubstring:
 	la $t0, psSubstring # psSubstring address.
 	add $t1, $zero, $zero # i = 0.
 	addi $t2, $zero, 4 # sPos = 1.
+	
 	# COPY STRING -> PSSUBSTRING #
 psStringCpyLoop:
 	add $t3, $t0, $t1 # psSubstring[i] address.
@@ -121,6 +122,8 @@ psStringCpyEnd:
 	add $sp, $sp, $t2 # stackPointer + sPos.
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $t8, 0($sp) # Put ra on the stack.
+	
+	# MAIN FUNCTION #
 psMain:
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
@@ -147,7 +150,9 @@ psMain:
 	slt $t0, $t5, 1 # characterCount < 1?
 	beq $t0, 1, psInvalid # characterCount < 1, invalid.
 	
-	j psReturn
+psCalc:
+	
+	
 	
 psInvalid:
 	j psReturn
@@ -157,7 +162,7 @@ psReturn:
 	jr $ra # return to CalculateValues.
 	
 	
-# CHARACTER CONVERSION #
+## CHARACTER CONVERSION ##
 
 # POWER #
 powerFunct: # a0 = base, a1 = power, v0 = Result.
@@ -200,7 +205,7 @@ endCharCheck:
 	jr $ra
 
 	
-# STRING CLEANUP #
+## STRING CLEANUP ##
 
 # REMOVE LEADING SPACES #
 removeLeading:
