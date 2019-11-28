@@ -151,7 +151,11 @@ psMain:
 	beq $t0, 1, psInvalid # characterCount < 1, invalid.
 	
 psCalc:
-	
+	add $s0, $zero, $zero # i = 0.
+	lw $s1, base # base.
+	add $s2, $zero, $zero # power.
+	add $s3, $zero, $zero # result = 0.
+psCalcLoop:
 	
 	
 psInvalid:
