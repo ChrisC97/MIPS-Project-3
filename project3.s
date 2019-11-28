@@ -176,6 +176,15 @@ pFEndOne:
 	addi $v0, $zero, 1 # powerResult = 1.
 pFEnd:
 	jr $ra
+	
+# CONVERT TO UPPERCASE #
+toUppercase: # a0 = character, v0 = resultCharacter.
+	blt $a0, 'a', toUppercaseEnd  # If less than a, return. No change needed.
+	bgt $a0, 'z', toUppercaseEnd  # If more than z, return. No change needed.
+	sub $a0, $a0, 32  # Lowercase characters are offset from uppercase by 32.
+toUppercaseEnd:
+	add $v0, $zero, $a0
+	jr $ra
 
 	
 # STRING CLEANUP #
