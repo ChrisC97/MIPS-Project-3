@@ -82,11 +82,13 @@ cvProcessAndLoop:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
+	addiu $sp, $sp, 4 # Pop $ra off the stack.
 	j cvProcessSubLoop
 cvProcessAndEnd:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the null character.
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
+	addiu $sp, $sp, 4 # Pop $ra off the stack.
 cvEnd:
 	jr $ra # return to main.
 	
@@ -100,10 +102,16 @@ psStringCpyLoop:
 	add $t3, $t0, $t1 # psSubstring[i] address.
 	add $t5, $sp, $t2 # stackCharacter address.
 	lb $t4, 0($t5) # stackCharacter.
-	beq $t4, 0, psStringCpyEnd # stackCharacter == null, then exit out.
+	beq $t4, 0, psStringCpyNull # stackCharacter == null, fill with null.
+psStringCpyChar:
 	sb $t4, 0($t3) # psSubstring[i] = stackCharacter.
 	addiu $t1, $t1, 1 # i++
 	addiu $t2, $t2, 4 # sPos++
+	bgt $t1, 1000, psStringCpyEnd # i > 1000, exit out.
+	j psStringCpyLoop # Loop back.
+psStringCpyNull:
+	sb $t4, 0($t3) # psSubstring[i] = stackCharacter.
+	addiu $t1, $t1, 1 # i++
 	bgt $t1, 1000, psStringCpyEnd # i > 1000, exit out.
 	j psStringCpyLoop # Loop back.
 psStringCpyEnd:
