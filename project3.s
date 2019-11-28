@@ -92,4 +92,23 @@ cvEnd:
 	
 # PROCESS SUBSTRING #
 ProcessSubstring:
+	la $t0, psSubstring # psSubstring address.
+	add $t1, $zero, $zero # i = 0.
+	addi $t2, $zero, 4 # sPos = 1.
+	# COPY STRING -> PSSUBSTRING #
+psStringCpyLoop:
+	add $t3, $t0, $t1 # psSubstring[i] address.
+	add $t5, $sp, $t2 # stackCharacter address.
+	lb $t4, 0($t5) # stackCharacter.
+	beq $t4, 0, psStringCpyEnd # stackCharacter == null, then exit out.
+	sb $t4, 0($t3) # psSubstring[i] = stackCharacter.
+	addiu $t1, $t1, 1 # i++
+	addiu $t2, $t2, 4 # sPos++
+	bgt $t1, 1000, psStringCpyEnd # i > 1000, exit out.
+	j psStringCpyLoop # Loop back.
+psStringCpyEnd:
+	lw $t8, 0($sp) # Get ra off the stack.
+	add $sp, $sp, $t2 # stackPointer + sPos.
+	addiu $sp, $sp, -4 # create space in the stack.
+	sw $t8, 0($sp) # Put ra on the stack.
 	jr $ra # return to CalculateValues.
