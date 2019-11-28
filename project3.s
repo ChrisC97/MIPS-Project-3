@@ -9,6 +9,8 @@
 	# CalculateValues #
 	cvMessage: .space 1001 #1000 characters.
 	cvResult: .space 1001 # 1000 characters.
+	# Process Substring #
+	psSubstring: .space 1001 # 1000 characters.
 	
 .text # Instructions section, goes in text segment.
 
@@ -63,18 +65,18 @@ cvStringCpyLoop:
 	j cvStringCpyLoop # Loop back.
 cvStringCpyEnd:
 	# SPLIT SUBSTRINGS #
-	la $t0, cvMessage # cvMessage address.
-	add $t1, $zero, $zero # i = 0.
+	la $s0, cvMessage # cvMessage address.
+	add $s1, $zero, $zero # i = 0.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
 	sb $zero, 0($sp) # Save "null" to the stack. That signifies the end of the string.
 cvProcessSubLoop:
-	add $t2, $t0, $t1 # cvMessage[i] address.
-	lb $t3, 0($t2) # cvMessage[i].
+	add $s2, $s0, $s1 # cvMessage[i] address.
+	lb $s3, 0($s2) # cvMessage[i].
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	sb $t3, 0($sp) # stack[stackPointer] = cvMessage[i].
-	addi $t1, $t1, 1 # i++.
-	beq $t3, 44, cvProcessAndLoop # cvMessage[i] == ','. Process what's on the stack and loop.
-	beq $t3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
+	sb $s3, 0($sp) # stack[stackPointer] = cvMessage[i].
+	addi $s1, $s1, 1 # i++.
+	beq $s3, 44, cvProcessAndLoop # cvMessage[i] == ','. Process what's on the stack and loop.
+	beq $s3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
 	j cvProcessSubLoop
 cvProcessAndLoop:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
