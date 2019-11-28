@@ -3,7 +3,6 @@
 	MsgInput: .asciiz "Input: "
 	MsgInvalid: .asciiz "NaN"
 	MsgDivider: .asciiz ","
-	newLine: .asciiz "\n"
 	userString: .space 1001 #1000 characters
 	charCount: .word 0
 	# Main #
@@ -142,9 +141,6 @@ cvProcessAndEnd:
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
 	sw $v0, 0($sp) # stack[stackPointer] = result.
-	#addiu $sp, $sp, -4 # stackPointer -= 1.
-	#addiu $t0, $zero, -2 # -2.
-	#sw $t0, 0($sp) # Save "-2" to the stack. This will be our null.
 cvEnd:
 	jr $ra # return to main.
 	
@@ -187,14 +183,6 @@ psMain:
 	jal findCharCount
 	sw $v0, charCount # set charCount.
 	lw $t5, charCount # load charCount.
-	
-	#li $v0, 1 # Printing result
-	#add $a0, $zero, $t5 # Set a0 to the result.
-	#syscall 
-	
-	#li $v0, 4 # System call to print a string.
-	#la $a0, newLine # Load string to be printed.
-	#syscall # Print string.
 	
 	jal removeTrailing
 	
@@ -246,21 +234,11 @@ psCalcLoopEnd:
 	j psCalcLoop # Check the next character.
 	
 psInvalid:
-	#li $v0, 4 # System call to print a string.
-	#la $a0, MsgInvalid # Load string to be printed.
-	#syscall # Print string.
 	addi $v0, $zero, -1 # return -1.
 	j psReturn
 psValid:
-	#li $v0, 1 # Printing result
-	#add $a0, $zero, $s3 # Set a0 to the result.
-	#syscall 
 	add $v0, $zero, $s3 # return finalResult.
-psReturn:	
-	#li $v0, 4 # System call to print a string.
-	#la $a0, MsgDivider # Load string to be printed.
-	#syscall # Print string.
-	
+psReturn:		
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
 	jr $ra # return to CalculateValues.
