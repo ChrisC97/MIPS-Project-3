@@ -79,7 +79,7 @@ cvProcessSubLoop:
 	beq $s3, 44, cvProcessAndLoop # cvMessage[i] == ','. Process what's on the stack and loop.
 	beq $s3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
 	beq $s3, 10, cvProcessAndEnd # cvMessage[i] == \n. Process one more time.
-	j cvProcessSubLoop
+	j cvProcessSubLoop	
 cvProcessAndLoop:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
 	jal ProcessSubstring # Process substring.
@@ -112,7 +112,7 @@ psStringCpyChar:
 	bgt $t1, 1000, psStringCpyEnd # i > 1000, exit out.
 	j psStringCpyLoop # Loop back.
 psStringCpyNull:
-	sb $t4, 0($t3) # psSubstring[i] = stackCharacter.
+	sb $zero, 0($t3) # psSubstring[i] = null.
 	addiu $t1, $t1, 1 # i++
 	bgt $t1, 1000, psStringCpyEnd # i > 1000, exit out.
 	j psStringCpyLoop # Loop back.
@@ -199,7 +199,7 @@ rSLoop:
 	add $t6, $t1, $t2 # tempMessage[i] address.
 	lb $t7, 0($t6) # tempMessage[i].
 	sb $t7, 0($t5) # message[i] = tempMessage[i].
-	sb $zero, 0($t6) # tempMessage[i] = 0
+	sb $zero, 0($t6) # tempMessage[i] = null
  	addi $t2, $t2, 1 # i++.
 	bgt $t2, 1001, rSLoopEnd # i > 1001, end of string.
 	j rSLoop
@@ -211,6 +211,9 @@ findCharCount:
 	la $t0, psSubstring # message address.
 	add $t1, $zero, $zero # i.
 	add $v0, $zero, $zero # charCount = 0.
+	add $t2, $t0, $t1 # message[0] address.
+	lb $t3, 0($t2) # message[0].
+	beq $t3, 0, fCEndEmpty # message[0] == null, empty string.
 fCLoop:
 	add $t2, $t0, $t1 # message[i] address.
 	lb $t3, 0($t2) # message[i].
@@ -222,6 +225,7 @@ fCLoop:
 fCLoopEnd:
 	addi $t1, $t1, 1 # i++.
 	j fCLoop
+fCEndEmpty:
+	addiu $v0, $zero, -1 # Empty, count = -1.
 fCEnd:
-	addi $v0, $v0, 1 # the number of characters is i+1.
 	jr $ra
