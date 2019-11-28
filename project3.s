@@ -125,13 +125,13 @@ psStringCpyEnd:
 	
 	# MAIN FUNCTION #
 psMain:
-	li $v0, 4 # System call to print a string.
-	la $a0, psSubstring # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, psSubstring # Load string to be printed.
+	#syscall # Print string.
 	
-	li $v0, 4 # System call to print a string.
-	la $a0, newLine # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, newLine # Load string to be printed.
+	#syscall # Print string.
 
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
@@ -200,18 +200,18 @@ psCalcLoopEnd:
 	j psCalcLoop # Check the next character.
 	
 psInvalid:
-	li $v0, 4 # System call to print a string.
-	la $a0, MsgInvalid # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, MsgInvalid # Load string to be printed.
+	#syscall # Print string.
 	j psReturn
 psValid:
-	li $v0, 1 # Printing result
-	add $a0, $zero, $s3 # Set a0 to the result.
-	syscall 
+	#li $v0, 1 # Printing result
+	#add $a0, $zero, $s3 # Set a0 to the result.
+	#syscall 
 psReturn:	
-	li $v0, 4 # System call to print a string.
-	la $a0, newLine # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, MsgDivider # Load string to be printed.
+	#syscall # Print string.
 	
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
