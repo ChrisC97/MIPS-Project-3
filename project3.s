@@ -157,6 +157,27 @@ psReturn:
 	jr $ra # return to CalculateValues.
 	
 	
+# CHARACTER CONVERSION #
+
+# POWER #
+powerFunct: # a0 = base, a1 = power, v0 = Result.
+	add $t0, $zero, $zero # i.
+	addi $t0, $t0, 1 # add 1 to i once.
+	add $v0, $zero, $a0 # powerResult = base.
+	blt, $a1, 1, pFEndOne # power <= 0, just set result to 1.
+	blt, $a1, 2, pFEnd # power == 1, just return the number.
+pFLoop:
+	mult $v0, $a0 # powerResult * base
+	mflo $v0 # powerResult = powerResult * base.
+	addi, $t0, $t0, 1 # i++.
+	blt $t0, $a1, pFLoop # i < power, keep looping.
+	j pFEnd
+pFEndOne:
+	addi $v0, $zero, 1 # powerResult = 1.
+pFEnd:
+	jr $ra
+
+	
 # STRING CLEANUP #
 
 # REMOVE LEADING SPACES #
