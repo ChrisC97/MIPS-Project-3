@@ -78,6 +78,7 @@ cvProcessSubLoop:
 	addi $s1, $s1, 1 # i++.
 	beq $s3, 44, cvProcessAndLoop # cvMessage[i] == ','. Process what's on the stack and loop.
 	beq $s3, 0, cvProcessAndEnd # cvMessage[i] == null. Process one more time.
+	beq $s3, 10, cvProcessAndEnd # cvMessage[i] == \n. Process one more time.
 	j cvProcessSubLoop
 cvProcessAndLoop:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
@@ -123,6 +124,7 @@ psStringCpyEnd:
 psMain:
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
+	
 	jal removeLeading
 	jal replaceString
 	jal findCharCount
@@ -212,6 +214,7 @@ findCharCount:
 fCLoop:
 	add $t2, $t0, $t1 # message[i] address.
 	lb $t3, 0($t2) # message[i].
+	beq $t3, 0, fCEnd # message[i] == null, exit.
 	bgt $t1, 1000, fCEnd # i > 1000, end of string.
 	slt $t4, $t3, 33 # message[i] < '!'?
 	beq $t4, 1, fCLoopEnd # message[i] <= ' ', loop again.
