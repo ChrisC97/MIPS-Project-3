@@ -66,11 +66,11 @@ cvStringCpyLoop:
 	j cvStringCpyLoop # Loop back.
 cvStringCpyEnd:
 	# SPLIT SUBSTRINGS #
-	la $s0, cvMessage # cvMessage address.
 	add $s1, $zero, $zero # i = 0.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
 	sb $zero, 0($sp) # Save "null" to the stack. That signifies the end of the string.
 cvProcessSubLoop:
+	la $s0, cvMessage # cvMessage address.
 	add $s2, $s0, $s1 # cvMessage[i] address.
 	lb $s3, 0($s2) # cvMessage[i].
 	addiu $sp, $sp, -4 # stackPointer -= 1.
@@ -128,6 +128,10 @@ psMain:
 	li $v0, 4 # System call to print a string.
 	la $a0, psSubstring # Load string to be printed.
 	syscall # Print string.
+	
+	li $v0, 4 # System call to print a string.
+	la $a0, newLine # Load string to be printed.
+	syscall # Print string.
 
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
@@ -157,16 +161,18 @@ psMain:
 psCalc:
 	add $s0, $zero, $zero # i = 0.
 	lw $s7, charCount # charCount.
-	lw $s1, base # base.
+	lw $t8, base # base.
 	add $s2, $zero, $zero # power.
 	add $s3, $zero, $zero # finalResult = 0.
+	la $s4, psSubstring # psSubstring address.
 psCalcLoop:
 	beq $s0, $s7, psValid # i == charCount, exit out.
 	bgt $s0, $s7, psValid # i > charCount, exit out.
+	
 	# Variables
-	la $s4, psSubstring # message address.
 	add $s5, $s4, $s0 # psSubstring[i] address.
 	lb $s6, 0($s5) # psSubstring[i].
+	
 	# Logic
 	beq $s6, 0, psValid # psSubstring[i] == null, end of string. exit out.
 	
@@ -178,11 +184,11 @@ psCalcLoop:
 	jal isCharInRange # Is the character in our range? (0-9 and A-Z)
 	add $s6, $zero, $v0 # psSubstring[i] = result.
 	
-	bgt $s6, $s1, psInvalid # If the number is larger than our base, it's NaN.
-	beq $s6, $s1, psInvalid # If the number equals our base, it's NaN.
+	bgt $s6, $t8, psInvalid # If the number is larger than our base, it's NaN.
+	beq $s6, $t8, psInvalid # If the number equals our base, it's NaN.
 	
 	# Calculation
-	add $a0, $zero, $s1 # Base.
+	add $a0, $zero, $t8 # Base.
 	add $a1, $zero, $s2 # Power.
 	jal powerFunct
 	mult $s6, $v0 # char * (base^(power))
@@ -202,11 +208,11 @@ psValid:
 	li $v0, 1 # Printing result
 	add $a0, $zero, $s3 # Set a0 to the result.
 	syscall 
-	
+psReturn:	
 	li $v0, 4 # System call to print a string.
 	la $a0, newLine # Load string to be printed.
 	syscall # Print string.
-psReturn:	
+	
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
 	jr $ra # return to CalculateValues.
