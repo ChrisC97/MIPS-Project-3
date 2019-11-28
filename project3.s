@@ -11,6 +11,7 @@
 	cvResult: .space 1001 # 1000 characters.
 	# Process Substring #
 	psSubstring: .space 1001 # 1000 characters.
+	psTempSubstring: .space 1001 # 1000 characters.
 	
 .text # Instructions section, goes in text segment.
 
@@ -120,3 +121,84 @@ psStringCpyEnd:
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $t8, 0($sp) # Put ra on the stack.
 	jr $ra # return to CalculateValues.
+	
+	
+# STRING CLEANUP #
+
+# REMOVE LEADING SPACES #
+removeLeading:
+	la $t0, psSubstring # message address.
+	la $t1, psTempSubstring # newMessage address.
+	add $t2, $zero, $zero # i.
+	add $t3, $zero, $zero # h.
+	add $t4, $zero, $zero # hitCharacter. Defaults to false (0).
+rLLoop:
+	add $t5, $t0, $t2 # message[i].
+	add $t6, $t1, $t3 # newMessage[h].
+	lb $t7, 0($t5) # The character at message[i].
+	beq $t7, 0, rLLoopEnd # message[i] = null, end of string.
+	beq $t4, 1, rLLoopOther # hitCharacter == true, ignore our space logic.
+	bne $t7, 32, rLLoopOther # message[i] != ' ', ignore our space logic.
+rLLoopSpace:
+	addi $t2, $t2, 1 # i++.
+	j rLLoop
+rLLoopOther:
+	addi $t4, $zero, 1 # hitCharacter = true (1).
+	sb $t7, 0($t6) # newMessage[h] = message[i]
+	addi $t3, $t3, 1 # h++.
+	addi $t2, $t2, 1 # i++.
+	j rLLoop
+rLLoopEnd:
+	jr $ra # Return to where we were in the main loop.
+
+# REMOVE TRAILING SPACES #
+removeTrailing:
+	la $t0, psSubstring # message address.
+	add $t1, $zero, $zero # 0, null/the end of a string.
+	lw $t7, charCount # lastCharacterIndex.
+	bgt $t7, 1001, rTEnd # lastCharacterIndex > 1001, end of string.
+rTLoop:
+	add $t1, $t0, $t7 # message[lastCharacterIndex] address.
+	sb $t2, 0($t1) # message[lastCharacterIndex] = null.
+	addi $t7, $t7, 1 # lastCharacterIndex++.
+	bgt $t7, 1001, rTEnd # lastCharacterIndex > 1001, end of string.
+	j rTLoop
+rTEnd:
+	jr $ra
+	
+# REPLACE STRING #
+replaceString:
+	la $t0, psSubstring # message address.
+	la $t1, psTempSubstring # tempMessage address.
+	add $t2, $zero, $zero # i.
+rSLoop:
+	add $t5, $t0, $t2 # message[i] address.
+	add $t6, $t1, $t2 # tempMessage[i] address.
+	lb $t7, 0($t6) # The character at tempMessage[i].
+	sb $t7, 0($t5) # message[i] = tempMessage[i].
+	sb $zero, 0($t6) # tempMessage[i] = 0
+ 	addi $t2, $t2, 1 # i++.
+	bgt $t2, 1001, rSLoopEnd # i > 1001, end of string.
+	j rSLoop
+rSLoopEnd:
+	jr $ra # Return to where we were in the main loop.
+	
+# FIND LAST CHARACTER INDEX #
+findCharCount:
+	la $t0, psSubstring # message address.
+	add $t1, $zero, $zero # i.
+	add $s7, $zero, $zero # charCount = 0.
+fCLoop:
+	add $t2, $t0, $t1 # message[i].
+	lb $t3, 0($t2) # The character at message[i].
+	bgt $t1, 1000, fCEnd # i > 1000, end of string.
+	slt $t4, $t3, 33 # message[i] < '!'?
+	beq $t4, 1, fCLoopEnd # message[i] <= ' ', loop again.
+	add $s7, $zero, $t1 # charCount = i.
+fCLoopEnd:
+	addi $t1, $t1, 1 # i++.
+	j fCLoop
+fCEnd:
+	addi $s7, $s7, 1 # the number of characters is i+1.
+	add $v0, $zero, $s7 #sw $s7, charCount # set charCount.
+	jr $ra
