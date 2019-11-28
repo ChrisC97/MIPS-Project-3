@@ -6,6 +6,8 @@
 	newLine: .asciiz "\n"
 	userString: .space 1001 #1000 characters
 	charCount: .word 0
+	# Main #
+	sPointerStart: .word 0
 	# CalculateValues #
 	cvMessage: .space 1001 #1000 characters.
 	cvResult: .space 1001 # 1000 characters.
@@ -16,6 +18,9 @@
 .text # Instructions section, goes in text segment.
 
 main:
+	# Save the top of stack pos.
+	sw $sp, sPointerStart
+	
 	# PROMPT INPUT #
 	li $v0, 4 # System call to print a string.
 	la $a0, MsgInput # Load string to be printed.
@@ -43,6 +48,9 @@ mStringSaveLoop:
 mStringSaveLoopEnd:
 	# CALL FUNCTION #
 	jal CalculateValues # Subprogram A.
+	
+mPrintStrings:
+	
 	
 	# END OF PROGRAM #
 endProgram:
