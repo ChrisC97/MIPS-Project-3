@@ -6,8 +6,6 @@
 	newLine: .asciiz "\n"
 	userString: .space 1001 #1000 characters
 	charCount: .word 0
-	# Main #
-	sPointerStart: .word 0
 	# CalculateValues #
 	cvMessage: .space 1001 #1000 characters.
 	cvResult: .space 1001 # 1000 characters.
@@ -46,15 +44,11 @@ mStringSaveLoopEnd:
 	# CALL FUNCTION #
 	jal CalculateValues # Subprogram A.
 	
-mPrintStrings:
-	addi $t0, $zero, 0 # i = 0.
 mPrintStringsLoop:
-	lw $t1, 0($sp) # stack[stackPointer] number.
-	beq $t1, -2, endProgram # number == -2, end of stack. Exit out.
+	lw $t1, 0($sp) # result = stack[0].
+	blt $t1, -2, endProgram # result <= -3, end of stack. Exit out.
+	beq $t1, -2, mPSLEnd # result == -2, null character. Skip it.
 	
-	lw $t3, 0($t2) # result.
-	addi $t8, $zero, -1 # -1.
-	blt $t3, $t8, mPSLEnd # result <= -2, ignore it.
 	blt $t3, $zero, mPSLPrintError # result == -1, invalid.
 mPSLPrint:
 	li $v0, 1 # Printing result
@@ -74,6 +68,7 @@ mPSLPrintError:
 	la $a0, MsgDivider # Load string to be printed.
 	syscall # Print string.
 mPSLEnd:
+	addiu $sp, $sp, 4 # stackPointer++.
 	j mPrintStringsLoop
 	
 	# END OF PROGRAM #
@@ -100,10 +95,8 @@ cvStringCpyEnd:
 	# SPLIT SUBSTRINGS #
 	add $s1, $zero, $zero # i = 0.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	addi $t0, $zero, -2
-	sw $t0, 0($sp) # Save "-2" to the stack. That signifies the end of the string.
-	la $t0, 0($sp)
-	sw $t0, sPointerStart
+	addiu $t0, $zero, -3 # -3.
+	sw $t0, 0($sp) # Save "-3" to the stack. That signifies the end of the stack.
 cvProcessSubLoop:
 	la $s0, cvMessage # cvMessage address.
 	add $s2, $s0, $s1 # cvMessage[i] address.
@@ -121,8 +114,8 @@ cvProcessAndLoop:
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
 	sw $v0, 0($sp) # stack[stackPointer] = result.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	addi $t0, $zero, -2
-	sb $t0, 0($sp) # Save "-2" to the stack.
+	addiu $t0, $zero, -2 # -2.
+	sw $t0, 0($sp) # Save "-2" to the stack. This will be our null.
 	j cvProcessSubLoop
 cvProcessAndEnd:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the null character.
@@ -130,8 +123,8 @@ cvProcessAndEnd:
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
 	sw $v0, 0($sp) # stack[stackPointer] = result.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	addi $t0, $zero, -2
-	sb $t0, 0($sp) # Save "-2" to the stack.
+	addiu $t0, $zero, -2 # -2.
+	sw $t0, 0($sp) # Save "-2" to the stack. This will be our null.
 cvEnd:
 	jr $ra # return to main.
 	
@@ -241,20 +234,20 @@ psCalcLoopEnd:
 	j psCalcLoop # Check the next character.
 	
 psInvalid:
-	#li $v0, 4 # System call to print a string.
-	#la $a0, MsgInvalid # Load string to be printed.
-	#syscall # Print string.
+	li $v0, 4 # System call to print a string.
+	la $a0, MsgInvalid # Load string to be printed.
+	syscall # Print string.
 	addi $v0, $zero, -1 # return -1.
 	j psReturn
 psValid:
-	#li $v0, 1 # Printing result
-	#add $a0, $zero, $s3 # Set a0 to the result.
-	#syscall 
+	li $v0, 1 # Printing result
+	add $a0, $zero, $s3 # Set a0 to the result.
+	syscall 
 	add $v0, $zero, $s3 # return finalResult.
 psReturn:	
-	#li $v0, 4 # System call to print a string.
-	#la $a0, MsgDivider # Load string to be printed.
-	#syscall # Print string.
+	li $v0, 4 # System call to print a string.
+	la $a0, MsgDivider # Load string to be printed.
+	syscall # Print string.
 	
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
