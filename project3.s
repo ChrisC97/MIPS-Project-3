@@ -48,11 +48,10 @@ mPrintStringsLoop:
 	lw $t1, 0($sp) # result = stack[0].
 	blt $t1, -2, endProgram # result <= -3, end of stack. Exit out.
 	beq $t1, -2, mPSLEnd # result == -2, null character. Skip it.
-	
-	blt $t3, $zero, mPSLPrintError # result == -1, invalid.
+	blt $t1, $zero, mPSLPrintError # result == -1, invalid.
 mPSLPrint:
 	li $v0, 1 # Printing result
-	add $a0, $zero, $t3 # Set a0 to the result.
+	add $a0, $zero, $t1 # Set a0 to the result.
 	syscall  # Print number
 	
 	li $v0, 4 # System call to print a string.
@@ -139,7 +138,7 @@ psStringCpyLoop:
 	add $t3, $t0, $t1 # psSubstring[i] address.
 	add $t5, $sp, $t2 # stackCharacter address.
 	lb $t4, 0($t5) # stackCharacter.
-	beq $t4, 0, psStringCpyNull # stackCharacter == null, fill with null.
+	blt $t4, 1, psStringCpyNull # stackCharacter <= null, fill with null.
 psStringCpyChar:
 	sb $t4, 0($t3) # psSubstring[i] = stackCharacter.
 	addiu $t1, $t1, 1 # i++
@@ -159,14 +158,6 @@ psStringCpyEnd:
 	
 	# MAIN FUNCTION #
 psMain:
-	#li $v0, 4 # System call to print a string.
-	#la $a0, psSubstring # Load string to be printed.
-	#syscall # Print string.
-	
-	#li $v0, 4 # System call to print a string.
-	#la $a0, newLine # Load string to be printed.
-	#syscall # Print string.
-
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
 	
@@ -234,20 +225,20 @@ psCalcLoopEnd:
 	j psCalcLoop # Check the next character.
 	
 psInvalid:
-	li $v0, 4 # System call to print a string.
-	la $a0, MsgInvalid # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, MsgInvalid # Load string to be printed.
+	#syscall # Print string.
 	addi $v0, $zero, -1 # return -1.
 	j psReturn
 psValid:
-	li $v0, 1 # Printing result
-	add $a0, $zero, $s3 # Set a0 to the result.
-	syscall 
+	#li $v0, 1 # Printing result
+	#add $a0, $zero, $s3 # Set a0 to the result.
+	#syscall 
 	add $v0, $zero, $s3 # return finalResult.
 psReturn:	
-	li $v0, 4 # System call to print a string.
-	la $a0, MsgDivider # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, MsgDivider # Load string to be printed.
+	#syscall # Print string.
 	
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
