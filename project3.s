@@ -6,6 +6,8 @@
 	newLine: .asciiz "\n"
 	userString: .space 1001 #1000 characters
 	charCount: .word 0
+	# Main #
+	stackEnd: .word 0
 	# CalculateValues #
 	cvMessage: .space 1001 #1000 characters.
 	cvResult: .space 1001 # 1000 characters.
@@ -44,8 +46,21 @@ mStringSaveLoopEnd:
 	# CALL FUNCTION #
 	jal CalculateValues # Subprogram A.
 	
+mPrintStrings:
+	addiu $t0, $zero, -4 # i = -1.
+	addu $t7, $zero, $zero # lastPrint = false.
+	addu $t8, $zero, $zero # stackPos = 0.
+	addu $t9, $zero, $sp # stackStart.
 mPrintStringsLoop:
-	lw $t1, 0($sp) # result = stack[0].
+	lw $t8, stackEnd # stackEnd, aka the top of this list.
+	addu $t8, $t8, $t0 # stackPos = stackEnd - i.
+	blt $t8, $t9, endProgram # stackPos < stackStart, exit out.
+	beq $t8, $t9, mLastPrint # stackPos == stackStart
+	j mRegularPrint
+mLastPrint:
+	addi $t7, $zero, 1 # lastPrint = true (1).
+mRegularPrint:
+	lw $t1, 0($t8) # result = stack[stackPos].
 	blt $t1, -2, endProgram # result <= -3, end of stack. Exit out.
 	beq $t1, -2, mPSLEnd # result == -2, null character. Skip it.
 	blt $t1, $zero, mPSLPrintError # result == -1, invalid.
@@ -54,20 +69,24 @@ mPSLPrint:
 	add $a0, $zero, $t1 # Set a0 to the result.
 	syscall  # Print number
 	
+	beq $t7, 1, mPSLEnd
 	li $v0, 4 # System call to print a string.
 	la $a0, MsgDivider # Load string to be printed.
 	syscall # Print string.
+	
 	j mPSLEnd # Keep looping.
 mPSLPrintError:
 	li $v0, 4 # System call to print a string.
 	la $a0, MsgInvalid # Load string to be printed.
 	syscall # Print string.
 	
+	beq $t7, 1, mPSLEnd
 	li $v0, 4 # System call to print a string.
 	la $a0, MsgDivider # Load string to be printed.
 	syscall # Print string.
 mPSLEnd:
-	addiu $sp, $sp, 4 # stackPointer++.
+	#addiu $sp, $sp, 4 # stackPointer++.
+	addiu $t0, $t0, -4 # i -= 1.
 	j mPrintStringsLoop
 	
 	# END OF PROGRAM #
@@ -96,6 +115,8 @@ cvStringCpyEnd:
 	addiu $sp, $sp, -4 # stackPointer -= 1.
 	addiu $t0, $zero, -3 # -3.
 	sw $t0, 0($sp) # Save "-3" to the stack. That signifies the end of the stack.
+	la $t0, ($sp)
+	sw $t0, stackEnd # Save the position of the stack before this operation.
 cvProcessSubLoop:
 	la $s0, cvMessage # cvMessage address.
 	add $s2, $s0, $s1 # cvMessage[i] address.
@@ -121,9 +142,9 @@ cvProcessAndEnd:
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
 	sw $v0, 0($sp) # stack[stackPointer] = result.
-	addiu $sp, $sp, -4 # stackPointer -= 1.
-	addiu $t0, $zero, -2 # -2.
-	sw $t0, 0($sp) # Save "-2" to the stack. This will be our null.
+	#addiu $sp, $sp, -4 # stackPointer -= 1.
+	#addiu $t0, $zero, -2 # -2.
+	#sw $t0, 0($sp) # Save "-2" to the stack. This will be our null.
 cvEnd:
 	jr $ra # return to main.
 	
