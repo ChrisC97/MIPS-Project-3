@@ -125,6 +125,10 @@ psStringCpyEnd:
 	
 	# MAIN FUNCTION #
 psMain:
+	li $v0, 4 # System call to print a string.
+	la $a0, psSubstring # Load string to be printed.
+	syscall # Print string.
+
 	addiu $sp, $sp, -4 # create space in the stack.
 	sw $ra, 0($sp) # Push our ra on the stack.
 	
@@ -134,13 +138,13 @@ psMain:
 	sw $v0, charCount # set charCount.
 	lw $t5, charCount # load charCount.
 	
-	li $v0, 1 # Printing result
-	add $a0, $zero, $t5 # Set a0 to the result.
-	syscall 
+	#li $v0, 1 # Printing result
+	#add $a0, $zero, $t5 # Set a0 to the result.
+	#syscall 
 	
-	li $v0, 4 # System call to print a string.
-	la $a0, newLine # Load string to be printed.
-	syscall # Print string.
+	#li $v0, 4 # System call to print a string.
+	#la $a0, newLine # Load string to be printed.
+	#syscall # Print string.
 	
 	jal removeTrailing
 	
@@ -149,18 +153,60 @@ psMain:
 	
 	slt $t0, $t5, 1 # characterCount < 1?
 	beq $t0, 1, psInvalid # characterCount < 1, invalid.
-	
+
 psCalc:
 	add $s0, $zero, $zero # i = 0.
+	lw $s7, charCount # charCount.
 	lw $s1, base # base.
 	add $s2, $zero, $zero # power.
-	add $s3, $zero, $zero # result = 0.
+	add $s3, $zero, $zero # finalResult = 0.
 psCalcLoop:
+	beq $s0, $s7, psValid # i == charCount, exit out.
+	bgt $s0, $s7, psValid # i > charCount, exit out.
+	# Variables
+	la $s4, psSubstring # message address.
+	add $s5, $s4, $s0 # psSubstring[i] address.
+	lb $s6, 0($s5) # psSubstring[i].
+	# Logic
+	beq $s6, 0, psValid # psSubstring[i] == null, end of string. exit out.
 	
+	add $a0, $zero, $s6 # Pass the character.
+	jal toUppercase # Convert the character to uppercase. 
+	add $s6, $zero, $v0 # psSubstring[i] = result.
+	
+	add $a0, $zero, $s6 # Pass the character.
+	jal isCharInRange # Is the character in our range? (0-9 and A-Z)
+	add $s6, $zero, $v0 # psSubstring[i] = result.
+	
+	bgt $s6, $s1, psInvalid # If the number is larger than our base, it's NaN.
+	beq $s6, $s1, psInvalid # If the number equals our base, it's NaN.
+	
+	# Calculation
+	add $a0, $zero, $s1 # Base.
+	add $a1, $zero, $s2 # Power.
+	jal powerFunct
+	mult $s6, $v0 # char * (base^(power))
+	mflo $v0 # powerResult = char * (base^(power))
+	add $s3, $s3, $v0 # finalResult += powerResult.
+psCalcLoopEnd:
+	addi $s0, $s0, 1 # i++
+	addi $s2, $s2, 1 # power++
+	j psCalcLoop # Check the next character.
 	
 psInvalid:
+	li $v0, 4 # System call to print a string.
+	la $a0, MsgInvalid # Load string to be printed.
+	syscall # Print string.
 	j psReturn
-psReturn:
+psValid:
+	li $v0, 1 # Printing result
+	add $a0, $zero, $s3 # Set a0 to the result.
+	syscall 
+	
+	li $v0, 4 # System call to print a string.
+	la $a0, newLine # Load string to be printed.
+	syscall # Print string.
+psReturn:	
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
 	jr $ra # return to CalculateValues.
@@ -206,6 +252,7 @@ checkIfIgnore:
 	blt $a0, 65, psInvalid # Value is between '9' and 'A', print an error.
 	sub $a0, $a0, 55 # The value is between 'A' and 'Z', make it values 10-35.
 endCharCheck:
+	add $v0, $zero, $a0
 	jr $ra
 
 	
