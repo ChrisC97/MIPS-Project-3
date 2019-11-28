@@ -68,7 +68,8 @@ cvStringCpyEnd:
 	# SPLIT SUBSTRINGS #
 	add $s1, $zero, $zero # i = 0.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	sb $zero, 0($sp) # Save "null" to the stack. That signifies the end of the string.
+	addi $t7, $zero, -2
+	sw $t7, 0($sp) # Save -2 to the stack. That signifies the end of the string.
 cvProcessSubLoop:
 	la $s0, cvMessage # cvMessage address.
 	add $s2, $s0, $s1 # cvMessage[i] address.
@@ -84,13 +85,17 @@ cvProcessAndLoop:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the ',' character.
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
-	addiu $sp, $sp, 4 # Pop $ra off the stack.
+	sw $v0, 0($sp) # stack[stackPointer] = result.
+	addiu $sp, $sp, -4 # stackPointer -= 1.
+	sb $zero, 0($sp) # Save "null" to the stack.
 	j cvProcessSubLoop
 cvProcessAndEnd:
 	sw $ra, 0($sp) # stack[stackPointer] = $ra. We overrirde the null character.
 	jal ProcessSubstring # Process substring.
 	lw $ra, 0($sp) # $ra = stack[stackPointer].
-	addiu $sp, $sp, 4 # Pop $ra off the stack.
+	sw $v0, 0($sp) # stack[stackPointer] = result.
+	addiu $sp, $sp, -4 # stackPointer -= 1.
+	sb $zero, 0($sp) # Save "null" to the stack.
 cvEnd:
 	jr $ra # return to main.
 	
@@ -203,11 +208,13 @@ psInvalid:
 	#li $v0, 4 # System call to print a string.
 	#la $a0, MsgInvalid # Load string to be printed.
 	#syscall # Print string.
+	addi $v0, $zero, -1 # return -1.
 	j psReturn
 psValid:
 	#li $v0, 1 # Printing result
 	#add $a0, $zero, $s3 # Set a0 to the result.
 	#syscall 
+	add $v0, $zero, $s3 # return finalResult.
 psReturn:	
 	#li $v0, 4 # System call to print a string.
 	#la $a0, MsgDivider # Load string to be printed.
