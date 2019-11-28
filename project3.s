@@ -42,7 +42,7 @@ mStringSaveLoop:
 	j mStringSaveLoop # Loop back.
 mStringSaveLoopEnd:
 	# CALL FUNCTION #
-	jal CalculateValues
+	jal CalculateValues # Subprogram A.
 	
 	# END OF PROGRAM #
 endProgram:
@@ -141,6 +141,17 @@ psMain:
 	
 	jal removeTrailing
 	
+	slt $t0, $t5, 5 # characterCount < 5?
+	beq $t0, 0, psInvalid # characterCount >= 5, invalid.
+	
+	slt $t0, $t5, 1 # characterCount < 1?
+	beq $t0, 1, psInvalid # characterCount < 1, invalid.
+	
+	j psReturn
+	
+psInvalid:
+	j psReturn
+psReturn:
 	lw $ra, 0($sp) # Pop ra off the stack.
 	addi $sp, $sp, 4 # Return the stack pointer.
 	jr $ra # return to CalculateValues.
