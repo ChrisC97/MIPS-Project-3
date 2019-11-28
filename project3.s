@@ -19,7 +19,8 @@
 
 main:
 	# Save the top of stack pos.
-	sw $sp, sPointerStart
+	la $t0, 0($sp)
+	sw $t0, sPointerStart
 	
 	# PROMPT INPUT #
 	li $v0, 4 # System call to print a string.
@@ -50,7 +51,17 @@ mStringSaveLoopEnd:
 	jal CalculateValues # Subprogram A.
 	
 mPrintStrings:
-	
+	lw $t0, sPointerStart # Top of the stack.
+	addi $t1, $zero, -4 # i = 0.
+mPrintStringsLoop:
+	add $t2, $t0, $t1 # currPos = stackTop + i.
+	beq $t2, $sp, endProgram # currPos == stackPointer, exit out.
+	blt $t2, $sp, endProgram # currPos < stackPointer, just set result to 1.
+	addi $t1, $t1, -4 # i--.
+mPSLEnd:
+	j mPrintStringsLoop
+mPSLEnd:
+	j mPrintStringsLoop
 	
 	# END OF PROGRAM #
 endProgram:
@@ -76,8 +87,9 @@ cvStringCpyEnd:
 	# SPLIT SUBSTRINGS #
 	add $s1, $zero, $zero # i = 0.
 	addiu $sp, $sp, -4 # stackPointer -= 1.
-	addi $t7, $zero, -2
-	sw $t7, 0($sp) # Save -2 to the stack. That signifies the end of the string.
+	sw $zero, 0($sp) # Save "null" to the stack. That signifies the end of the string.
+	la $t0, 0($sp)
+	sw $t0, sPointerStart
 cvProcessSubLoop:
 	la $s0, cvMessage # cvMessage address.
 	add $s2, $s0, $s1 # cvMessage[i] address.
@@ -240,8 +252,8 @@ powerFunct: # a0 = base, a1 = power, v0 = Result.
 	add $t0, $zero, $zero # i.
 	addi $t0, $t0, 1 # add 1 to i once.
 	add $v0, $zero, $a0 # powerResult = base.
-	blt, $a1, 1, pFEndOne # power <= 0, just set result to 1.
-	blt, $a1, 2, pFEnd # power == 1, just return the number.
+	blt $a1, 1, pFEndOne # power <= 0, just set result to 1.
+	blt $a1, 2, pFEnd # power == 1, just return the number.
 pFLoop:
 	mult $v0, $a0 # powerResult * base
 	mflo $v0 # powerResult = powerResult * base.
